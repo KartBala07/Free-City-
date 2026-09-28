@@ -1,3 +1,5 @@
+import { peopleLayer } from "./people.js";
+import { resident } from "./population.js";
 import { COLORS, calendar } from "./simulation.js";
 import { HOME, PLACES, citizenLngLat, validMapCamera } from "./geography.js";
 import { landmarkLayer } from "./landmarks.js";
@@ -60,7 +62,7 @@ export class Renderer {
       });
       this.map.on("style.load", () => this.setup());
       this.map.on("idle", () => {
-        if (this.ready) {
+        if (this.ready && this.map.queryRenderedFeatures({layers:["building-3d"]}).length) {
           this.status.textContent = this.elevationFailed
             ? "Elevation unavailable · Streets and 3D buildings still work."
             : "San Francisco · Live geographic map";
@@ -162,6 +164,7 @@ export class Renderer {
         "circle-stroke-width": ["case", ["get", "selected"], 2, 0],
       },
     });
+    map.addLayer(peopleLayer(maplibregl,()=>this.world,()=>this.view));
     map.addLayer({
       id: "citizens",
       type: "circle",
@@ -178,6 +181,8 @@ export class Renderer {
           19,
           8,
         ],
+        "circle-opacity": 0,
+        "circle-stroke-opacity": 0,
         "circle-color": ["get", "color"],
         "circle-stroke-width": 1.5,
         "circle-stroke-color": "#173534",
@@ -236,7 +241,7 @@ export class Renderer {
   }
   focusCitizen() {
     if (!this.map || !this.world) return;
-    const a = this.world.citizens.find((a) => a.id === this.view.selected);
+    const a = resident(this.world,this.view.selected).person;
     if (a)
       this.map.flyTo({
         center: citizenLngLat(a),
@@ -308,6 +313,7 @@ export class Renderer {
     this.lastTick = world.ticks;
     this.lastWeather = world.weather;
     this.lastWorld = world;
+    this.map.triggerRepaint();
     this.map
       .getSource("citizens")
       ?.setData({

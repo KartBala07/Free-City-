@@ -1,3 +1,5 @@
+import { decisionNetwork } from "./decisions.js";
+import { FIRST, ACTIVE_LIMIT } from "./population.js";
 export const NAMES = [
   "TensorFlow",
   "PyTorch",
@@ -187,30 +189,25 @@ export function tick(s) {
       continue;
     }
     if (s.ticks % 10 === a.id % 10) {
-      const scores = [
-        ["Eat", a.hunger * 1.4],
-        ["Rest", (1 - a.energy) * 1.2],
-        ["Work", 0.25 + a.drives.ambition * 0.35 + (a.wealth < 15 ? 0.3 : 0)],
-        ["Socialize", a.drives.empathy * 0.65 + random(s) * 0.2],
-        ["Explore", a.drives.analysis * 0.45 + random(s) * 0.25],
-      ];
-      a.scores = scores.sort((a, b) => b[1] - a[1]);
+      a.scores = decisionNetwork(s,a).outputs.map(n=>[n.name,n.value]);
       a.action = a.scores[0][0];
       if (a.action === "Eat") {
         aim(a, 0, 4);
         a.thought = `Hunger is ${Math.round(a.hunger * 100)}%. Food costs ${s.price.toFixed(1)} credits.`;
       }
       if (a.action === "Rest") {
-        aim(a, -10, -15);
+        aim(a, a.home?.x ?? -10, a.home?.z ?? -15);
         a.thought = "I need to recover before taking on more work.";
       }
+      if (a.action === "Family") { aim(a,a.home?.x ?? -10,a.home?.z ?? -15); a.thought="Time at home helps me care for my family."; }
+      if (a.action === "School") { aim(a,-10,-3); a.thought="Learning and seeing my classmates matter to me."; }
       if (a.action === "Work") {
         const dest =
-          a.role === "Builder"
+          (a.role === "Builder" || a.job?.sector === "Construction")
             ? [10, 13]
-            : a.role === "Researcher"
+            : (a.role === "Researcher" || ["Research","Technology"].includes(a.job?.sector))
               ? [10, -3]
-              : a.role === "Trader"
+              : (a.role === "Trader" || ["Retail","Hospitality","Finance"].includes(a.job?.sector))
                 ? [0, 4]
                 : [-10, -3];
         aim(a, ...dest);
@@ -233,17 +230,19 @@ export function tick(s) {
       a.x += (dx / dist) * 0.32;
       a.z += (dz / dist) * 0.32;
     } else {
-      if (a.action === "Eat" && s.food >= 1 && a.wealth >= s.price) {
+      if (a.action === "Eat" && s.food >= 1 && (a.wealth >= s.price || a.age<18)) {
         s.food--;
-        a.wealth -= s.price;
+        a.wealth = Math.max(0,a.wealth-s.price);
         s.treasury += s.price;
         a.hunger = clamp(a.hunger - 0.2);
         a.health = clamp(a.health + 0.02);
       }
+      if (a.action === "School" && a.skills) a.skills.research = Math.min(100,a.skills.research+.002);
+      if (a.action === "Family") a.energy=clamp(a.energy+.003);
       if (a.action === "Rest") a.energy = clamp(a.energy + 0.025);
       if (a.action === "Work") {
-        a.wealth += 0.25 * (1 - s.tax);
-        s.treasury += 0.25 * s.tax;
+        a.wealth += (a.job?.wage ?? .25) * (1 - s.tax);
+        s.treasury += (a.job?.wage ?? .25) * s.tax;
         s.food += 0.14;
         s.materials += 0.025;
         a.energy = clamp(a.energy - 0.001);
@@ -323,7 +322,7 @@ function social(s, alive) {
       s.food > 100 &&
       a.wealth > 40 &&
       b.wealth > 40 &&
-      alive.length < 150 &&
+      s.citizens.length < (s.population ? ACTIVE_LIMIT : 150) &&
       random(s) < 0.03
     ) {
       const id = s.nextId++;
@@ -335,7 +334,10 @@ function social(s, alive) {
       const child = {
         ...a,
         id,
-        name: `${a.name.split(" ")[0]}-${b.name.split(" ")[0]} ${id}`,
+        name: `${FIRST[id % FIRST.length]} ${a.name.split(" ").at(-1)}`,
+        job: {title:"Child",sector:"Education",employer:"Home",wage:0},
+        skills: {communication:0,building:0,research:0,care:0,creativity:0,organization:0},
+        friends: [], generation: (a.generation || 1)+1,
         age: 0,
         drives,
         wealth: 10,

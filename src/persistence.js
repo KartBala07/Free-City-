@@ -44,7 +44,7 @@ export function decode(raw) {
     w.version !== 1 ||
     !Number.isInteger(w.ticks) ||
     !Number.isInteger(w.nextId) ||
-    w.nextId > 1000000 ||
+    w.nextId > 51000000 ||
     !["Clear", "Rain", "Drought"].includes(w.weather) ||
     !logs(w.events) ||
     !Array.isArray(w.citizens) ||
@@ -52,7 +52,11 @@ export function decode(raw) {
     w.citizens.length > 500
   )
     throw new Error("Invalid world state.");
+  const census = w.population;
+  if(census && (census.total!==50000000 || census.modelVersion!==1 || !Number.isInteger(census.seed) || !finite(census.seed,0,4294967295))) throw new Error("Invalid population model.");
   const ids = new Set();
+  const known = id => ids.has(id) || (census && Number.isInteger(id) && id>=1 && id<=census.total);
+
   for (const a of w.citizens) {
     if (!a || !Number.isInteger(a.id) || a.id < 1 || ids.has(a.id))
       throw new Error("Invalid citizen ID.");
@@ -94,6 +98,11 @@ export function decode(raw) {
       )
     )
       throw new Error("Invalid relationships.");
+    if(a.home && (!Number.isInteger(a.home.building) || !finite(a.home.building,1,25000) || !Number.isInteger(a.home.floor) || !finite(a.home.floor,1,25) || !Number.isInteger(a.home.unit) || !finite(a.home.unit,1,20) || !finite(a.home.x,-100,100) || !finite(a.home.z,-100,100) || !text(a.home.label))) throw new Error("Invalid apartment.");
+    if(a.job && (!text(a.job.title)||!text(a.job.sector)||!text(a.job.employer)||!finite(a.job.wage,0,10))) throw new Error("Invalid job.");
+    if(a.skills && (typeof a.skills!=="object" || !Object.entries(a.skills).every(([k,v])=>text(k)&&finite(v,0,100)))) throw new Error("Invalid skills.");
+    if(a.friends && (!Array.isArray(a.friends)||a.friends.length>500||!a.friends.every(id=>Number.isInteger(id)&&id>0))) throw new Error("Invalid friends.");
+    for(const key of ['skin','clothes']) if(a[key] && !/^#[a-f0-9]{6}$/i.test(a[key])) throw new Error("Invalid appearance.");
     for (const key of ["parents", "children"])
       if (
         !Array.isArray(a[key]) ||
@@ -106,12 +115,12 @@ export function decode(raw) {
     throw new Error("Invalid world references.");
   for (const a of w.citizens)
     if (
-      (a.partner !== null && !ids.has(a.partner)) ||
+      (a.partner !== null && !known(a.partner)) ||
       [
         ...a.parents,
         ...a.children,
         ...Object.keys(a.relations).map(Number),
-      ].some((id) => !ids.has(id))
+      ].some((id) => !known(id))
     )
       throw new Error("Invalid family references.");
   const v = data.view;
@@ -122,7 +131,7 @@ export function decode(raw) {
     !finite(v.zoom, 0.3, 3) ||
     !finite(v.panX, -10000, 10000) ||
     !finite(v.panY, -10000, 10000) ||
-    (v.selected !== null && !ids.has(v.selected))
+    (v.selected !== null && !known(v.selected))
   )
     throw new Error("Invalid camera settings.");
   if (v.mapCamera !== undefined && !validMapCamera(v.mapCamera))

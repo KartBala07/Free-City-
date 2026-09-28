@@ -1,6 +1,6 @@
 # Free City — San Francisco
 
-A browser prototype of an autonomous city observer game, set on a geographic 3D map of San Francisco. Start with 50 citizens named after machine-learning frameworks, watch them pursue needs and work, and inspect their changing priorities.
+A browser prototype of an autonomous city observer game, set on a geographic 3D map of San Francisco. Explore a deterministic census of 50 million fictional named residents with families, jobs and private apartment records. 240 residents initially run live; inspect any census ID and activate households up to a 400-record limit.
 
 ## Run
 
@@ -13,6 +13,15 @@ python3 -m http.server 8000 --directory dist
 ```
 
 Open http://localhost:8000. Keep the same host and port to access the same browser save. Serve the files over HTTP; opening index.html directly is not supported by ES modules. Any static web host can serve the generated `dist/` folder.
+
+## Population and citizen dashboard
+
+- Enter a resident ID from 1 to 50,000,000, browse census pages, or choose a random resident. Name search covers the current page and active residents, not a full census index.
+- Open a citizen to inspect the weighted decision network, simulated inner voice, body, traits, skills, work, family links and memories. Graph weights are the same weights used by the decision engine.
+- Apartment building/floor/door controls resolve a stable household. Each initial household has two adults and two children. Names are fictional and may repeat; IDs are unique.
+- Activate a census household to run its members live. Off-screen census profiles use a daily schedule and gain episodic memories only after activation.
+- Three.js renders animated head, torso, arm and leg meshes with varied skin/clothing colors. People are enlarged and drawn over buildings at city scale for selection. These are stylized figures, not photorealistic characters.
+- Existing v1 saves migrate their residents to human names while preserving their simulation and family state.
 
 ## Controls
 
@@ -40,7 +49,7 @@ A San Francisco geographic map with 3D building extrusions, terrain, simplified 
 
 ## Scope and remaining design work
 
-This is an early playable prototype, not the complete Unity/Unreal design. The default renderer uses MapLibre GL JS and Three.js. The original schematic Canvas renderer remains available through Classic view. Citizen navigation is simple point-to-point movement, not obstacle-aware pathfinding. Decisions use adaptive rules; there is no local LLM or self-modifying neural network. Only caution currently adapts through experience; offspring inherit mutated drives. Factions and council selection are simplified. Full elections, laws, territorial warfare, treaties, construction, multi-stage industrial production, cultural evolution, sophisticated childcare, vector memory and long-term planning remain future work. City growth is capped at 150 living citizens; retained histories are bounded. The one-slot save schema is versioned for future migrations.
+This is an early playable prototype, not the complete Unity/Unreal design. The default renderer uses MapLibre GL JS and Three.js. The original schematic Canvas renderer remains available through Classic view. Citizen navigation is simple point-to-point movement, not obstacle-aware pathfinding. Decisions use adaptive rules; there is no local LLM or self-modifying neural network. Only caution currently adapts through experience; offspring inherit mutated drives. Factions and council selection are simplified. Full elections, laws, territorial warfare, treaties, construction, multi-stage industrial production, cultural evolution, sophisticated childcare, vector memory and long-term planning remain future work. The live simulation is capped at 400 resident records; retained histories are bounded. The other census records are generated on demand, not independently simulated. The 25,000 virtual buildings and 12.5 million apartments are a fictional allocation, not actual San Francisco housing. The one-slot save schema is versioned for future migrations.
 
 ## Validation
 

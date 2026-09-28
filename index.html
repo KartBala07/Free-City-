@@ -45,6 +45,24 @@
           <h2>San Francisco</h2>
           <p id="place-name">Downtown</p>
         </div>
+        <div class="map-bottom">
+          <div>
+            <span class="dot commons"></span>Commons
+            <span class="dot enterprise"></span>Enterprise
+            <span class="dot discovery"></span>Discovery
+          </div>
+          <span
+            >Drag pan · Right-drag orbit · Scroll zoom
+            <button id="reset-view">↺ View</button></span
+          >
+        </div>
+        <div class="map-status-wrap">
+          <span id="map-status" role="status">Loading San Francisco…</span
+          ><button id="classic-view">Classic view</button>
+        </div>
+        <div id="toast" role="status" aria-live="polite"></div>
+      </section>
+      <aside>
         <div class="sf-tools" aria-label="Explore San Francisco">
           <button data-place="downtown">Downtown</button
           ><button data-place="goldenGate">Golden Gate</button
@@ -64,15 +82,15 @@
         </div>
         <div class="metrics">
           <div>
-            <small>POPULATION</small><strong id="population">50</strong
+            <small>VIRTUAL POPULATION</small><strong id="population">50</strong
             ><span id="generations">50 founders</span>
           </div>
           <div>
-            <small>FOOD RESERVE</small><strong id="food">180</strong
+            <small>LIVE DISTRICT FOOD</small><strong id="food">180</strong
             ><span id="price">2.0 credits / unit</span>
           </div>
           <div>
-            <small>COMMUNITY WEALTH</small><strong id="wealth">0</strong
+            <small>LIVE DISTRICT WEALTH</small><strong id="wealth">0</strong
             ><span id="treasury">0 public credits</span>
           </div>
           <div>
@@ -80,24 +98,7 @@
             ><span id="council">Council forming</span>
           </div>
         </div>
-        <div class="map-bottom">
-          <div>
-            <span class="dot commons"></span>Commons
-            <span class="dot enterprise"></span>Enterprise
-            <span class="dot discovery"></span>Discovery
-          </div>
-          <span
-            >Drag pan · Right-drag orbit · Scroll zoom
-            <button id="reset-view">↺ View</button></span
-          >
-        </div>
-        <div class="map-status-wrap">
-          <span id="map-status" role="status">Loading San Francisco…</span
-          ><button id="classic-view">Classic view</button>
-        </div>
-        <div id="toast" role="status" aria-live="polite"></div>
-      </section>
-      <aside>
+
         <div class="aside-head">
           <span>CITIZEN OBSERVATORY</span><span class="live">●</span>
         </div>
@@ -105,13 +106,14 @@
           >⌕
           <input
             id="search"
-            placeholder="Find a citizen…"
+            placeholder="Name or resident ID…"
             aria-label="Search citizens" /></label
         ><select id="directory" aria-label="Select a citizen"></select>
         <button id="focus-citizen">Locate selected citizen</button>
-        <div id="inspector"></div>
+        <p id="selected-summary"></p><button id="open-mind" class="primary">Open citizen mind →</button><div class="page-buttons"><button id="previous-page">←</button><button id="next-page">→</button><button id="random-person">Random resident</button></div><small id="page-label"></small><p class="muted">Enter any ID from 1 to 50,000,000. Name search covers the current page and live residents.</p>
       </aside>
     </main>
+    <section id="mind-shell" hidden aria-label="Citizen dashboard"><div id="inspector"></div></section>
     <footer>
       <div class="chronicle">
         <div class="section-title">
@@ -138,8 +140,7 @@
       <span class="eyebrow">WELCOME TO FREE CITY</span>
       <h2>Your city.<br />San Francisco.</h2>
       <p>
-        50 citizens. Their own ambitions. No direct commands.<br />Watch a
-        society take shape, one decision at a time.
+        50 million virtual residents. 240 live minds.<br />Explore named families, private apartments, and daily work. The virtual census is generated on demand; up to 400 residents can run live.
       </p>
       <p id="saved-detail"></p>
       <div class="dialog-actions">
@@ -177,7 +178,7 @@
         mapped building volumes, without individual façade textures.
       </p>
       <p>
-        The 50 simulated citizens occupy a downtown district. Their movement is
+        The live simulated residents occupy a downtown district. The 50-million census and 12.5-million apartment allocation are fictional, not actual San Francisco population or housing data. Human figures are enlarged at city scale for visibility. Their movement is
         illustrative and does not yet follow San Francisco’s street network.
         Simulation weather and time are fictional.
       </p>

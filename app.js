@@ -1,3 +1,5 @@
+import { seedPopulation, resident, POPULATION, activateHousehold, apartmentIds } from "./src/population.js";
+import { renderInspector } from "./src/inspector.js";
 import {
   createWorld,
   tick,
@@ -21,7 +23,7 @@ const $ = (id) => document.getElementById(id),
           "'": "&#39;",
         })[c],
     );
-let world = createWorld(Date.now()),
+let world = seedPopulation(createWorld(Date.now()),true),
   view = { speed: 1, angle: 0.65, zoom: 1, panX: 0, panY: 15, selected: 1 },
   started = false,
   accumulator = 0,
@@ -31,6 +33,7 @@ let world = createWorld(Date.now()),
   saveAllowed = true;
 const renderer = new Renderer($("city"), view, (id) => {
   view.selected = id;
+  $("mind-shell").hidden=false;
   renderUI();
 });
 let toastTimer;
@@ -53,7 +56,7 @@ function save(manual = false) {
   }
 }
 function restore(data) {
-  world = data.world;
+  world = seedPopulation(data.world);
   Object.assign(view, data.view);
   view.mapCamera = data.view.mapCamera;
   renderer.restoreView();
@@ -79,7 +82,7 @@ function resume() {
   }
 }
 function startNew() {
-  world = createWorld(Date.now());
+  world = seedPopulation(createWorld(Date.now()),true);
   Object.assign(view, {
     speed: 1,
     angle: 0.65,
@@ -183,24 +186,33 @@ $("about-map").onclick = () => $("map-info").showModal();
 $("close-map-info").onclick = () => $("map-info").close();
 $("directory").onchange = (e) => {
   view.selected = Number(e.target.value);
+  $("mind-shell").hidden=false;
   renderUI();
 };
 $("search").oninput = renderDirectory;
+let pageStart=1;
 function renderDirectory() {
-  if (document.activeElement === $("directory")) return;
-  const query = $("search").value.toLowerCase();
-  const list = world.citizens.filter((a) =>
-    a.name.toLowerCase().includes(query),
-  );
-  $("directory").innerHTML = list
-    .map(
-      (a) =>
-        `<option value="${a.id}" ${a.id === view.selected ? "selected" : ""}>${escape(a.name)}${a.health <= 0 ? " · deceased" : ""}</option>`,
-    )
-    .join("");
-  if (!list.some((a) => a.id === view.selected))
-    $("directory").selectedIndex = -1;
+ if(document.activeElement===$("directory"))return;
+ const query=$("search").value.trim().toLowerCase();
+ let list;
+ if(/^\d+$/.test(query)){const id=Number(query);list=id>=1&&id<=POPULATION?[resident(world,id).person]:[];}
+ else {const ids=new Set([...world.citizens.map(a=>a.id),...Array.from({length:32},(_,i)=>pageStart+i).filter(id=>id<=POPULATION)]);list=[...ids].map(id=>resident(world,id).person).filter(a=>a.name.toLowerCase().includes(query));}
+ $("directory").innerHTML=list.map(a=>`<option value="${a.id}" ${a.id===view.selected?'selected':''}>#${a.id.toLocaleString()} · ${escape(a.name)}</option>`).join('');
+ if(!list.some(a=>a.id===view.selected))$("directory").selectedIndex=-1;
+ $("page-label").textContent=`Census ${pageStart.toLocaleString()}–${Math.min(POPULATION,pageStart+31).toLocaleString()} + live residents`;
 }
+$('previous-page').onclick=()=>{pageStart=Math.max(1,pageStart-32);renderDirectory();};
+$('next-page').onclick=()=>{pageStart=Math.min(POPULATION-31,pageStart+32);renderDirectory();};
+$('random-person').onclick=()=>{view.selected=1+Math.floor(Math.random()*POPULATION);pageStart=Math.floor((view.selected-1)/32)*32+1;$('search').value='';$('mind-shell').hidden=false;renderUI();};
+$('open-mind').onclick=()=>{$('mind-shell').hidden=false;renderUI();};
+$('inspector').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.hasAttribute('data-close-mind')){$('mind-shell').hidden=true;return;}
+ if(b.dataset.person){view.selected=Number(b.dataset.person);renderUI();}
+ if(b.hasAttribute('data-home'))renderer.focusCitizen();
+ if(b.hasAttribute('data-activate')){try{const n=activateHousehold(world,view.selected);toast(`${n} household members joined the live simulation.`);renderUI();}catch(e){toast(e.message);}}
+ if(b.hasAttribute('data-apartment')){const ids=apartmentIds(Number($('apt-building').value),Number($('apt-floor').value),Number($('apt-unit').value));if(ids.length){view.selected=ids[0];renderUI();}else toast('Choose building 1–25,000, floor 1–25, and apartment 1–20.');}
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('mind-shell').hidden=true;});
 function renderUI() {
   $("calendar").textContent = dateLabel(world.minutes);
   $("weather").textContent =
@@ -211,9 +223,9 @@ function renderUI() {
     b.setAttribute("aria-pressed", active);
   }
   const alive = world.citizens.filter((a) => a.health > 0);
-  $("population").textContent = alive.length;
+  $("population").textContent = (POPULATION+world.births-world.deaths).toLocaleString();
   $("generations").textContent =
-    `${world.births} births · ${world.deaths} deaths`;
+    `${alive.length} live · ${world.births} births · ${world.deaths} deaths`;
   $("food").textContent = Math.floor(world.food);
   $("price").textContent = `${world.price.toFixed(1)} credits / unit`;
   $("wealth").textContent = Math.round(
@@ -225,50 +237,9 @@ function renderUI() {
     ? `Council: ${world.citizens.find((a) => a.id === world.leader)?.name}`
     : "Council forming";
   renderDirectory();
-  const a = world.citizens.find((a) => a.id === view.selected);
-  if (a) {
-    const family = a.partner
-      ? world.citizens.find((b) => b.id === a.partner)?.name
-      : "Unpartnered";
-    $("inspector").innerHTML =
-      `<div class="citizen-head"><div class="avatar">${escape(a.name[0])}</div><div><h2>${escape(a.name)}</h2><p>${escape(a.role)} · Age ${Math.floor(a.age)} · ${a.wealth.toFixed(0)} credits</p></div></div><span class="badge">${FACTIONS[a.faction].toUpperCase()} / ${a.health > 0 ? escape(a.action).toUpperCase() : "DECEASED"}</span><div class="vitals">${[
-        ["Health", a.health],
-        ["Energy", a.energy],
-        ["Fullness", 1 - a.hunger],
-      ]
-        .map(
-          ([n, v]) =>
-            `<div><small>${n} ${Math.round(v * 100)}%</small><div class="bar"><i style="width:${v * 100}%"></i></div></div>`,
-        )
-        .join(
-          "",
-        )}</div><section class="ins-section"><div class="section-title"><span>DECISION MAP</span><small>Live priorities</small></div><div class="node">${escape(a.goal)}</div><div class="connector">│</div><div class="branches">${a.scores
-        .slice(0, 2)
-        .map(
-          ([n, v]) => `<div class="node">${escape(n)} · ${v.toFixed(2)}</div>`,
-        )
-        .join(
-          "",
-        )}</div><div class="connector">↓</div><div class="node">Current action: ${escape(a.action)}</div></section><section class="ins-section"><div class="section-title"><span>INNER MONOLOGUE</span><small>Simulation narration</small></div><div class="thought">“${escape(a.thought)}”</div></section><section class="ins-section"><div class="section-title"><span>ADAPTIVE DRIVES</span><small>0–100</small></div>${Object.entries(
-        a.drives,
-      )
-        .map(
-          ([key, v]) =>
-            `<div class="drive"><span>${escape(key)}</span><div class="bar"><i style="width:${v * 100}%"></i></div><span>${Math.round(v * 100)}</span></div>`,
-        )
-        .join(
-          "",
-        )}</section><section class="ins-section"><div class="section-title"><span>MEMORY VAULT</span><small>${a.memories.length} records</small></div>${
-        a.memories
-          .slice(0, 5)
-          .map(
-            (m) =>
-              `<div class="memory"><small>${dateLabel(m.time)}</small>${escape(m.text)}</div>`,
-          )
-          .join("") ||
-        '<p class="muted">New memories will appear as encounters shape this citizen.</p>'
-      }<p class="muted">${escape(family)} · ${a.children.length} children${a.parents.length ? ` · Parents: ${a.parents.map((id) => escape(world.citizens.find((b) => b.id === id)?.name || "Unknown")).join(", ")}` : ""}</p></section>`;
-  }
+  const a=resident(world,view.selected).person;
+  $('selected-summary').textContent=`${a.name} · ${a.role}`;
+  if(!$('mind-shell').hidden && !document.activeElement?.matches('.apartment-panel input')) $('inspector').innerHTML=renderInspector(world,view.selected);
   $("events").innerHTML = world.events
     .slice(0, 12)
     .map(
@@ -282,7 +253,7 @@ try {
   $("continue").disabled = !saved;
   $("saved-detail").textContent = saved
     ? `Saved city: ${dateLabel(saved.world.minutes)} · ${saved.world.citizens.filter((a) => a.health > 0).length} citizens`
-    : "Your first city begins with 50 founders at 08:00 on Day 1.";
+    : "50 million virtual residents. 240 run live at 08:00 on Day 1.";
 } catch (e) {
   saveAllowed = false;
   $("continue").disabled = true;
@@ -310,7 +281,7 @@ function frame(now) {
     for (let i = 0; i < steps; i++) tick(world);
   }
   renderer.draw(world);
-  if (now - lastUI > 300) {
+  if (now - lastUI > 1000 && view.speed) {
     renderUI();
     lastUI = now;
   }
