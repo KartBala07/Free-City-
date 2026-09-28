@@ -1,3 +1,4 @@
+import { validMapCamera } from "./geography.js";
 import { createWorld } from "./simulation.js";
 export const SAVE_KEY = "free-city.save.v1";
 export function encode(world, view) {
@@ -124,6 +125,8 @@ export function decode(raw) {
     (v.selected !== null && !ids.has(v.selected))
   )
     throw new Error("Invalid camera settings.");
+  if (v.mapCamera !== undefined && !validMapCamera(v.mapCamera))
+    throw new Error("Invalid geographic camera.");
   if (!text(data.savedAt) || !Number.isFinite(Date.parse(data.savedAt)))
     throw new Error("Invalid save date.");
   return data;

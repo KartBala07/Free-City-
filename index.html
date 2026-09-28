@@ -3,16 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Free City · A society in motion</title>
+    <title>Free City · San Francisco</title>
+    <link rel="stylesheet" href="vendor/maplibre-gl.css" />
     <link rel="stylesheet" href="style.css" />
+    <script src="vendor/maplibre-gl.js"></script>
   </head>
   <body>
     <header>
       <div class="brand">
         <span class="logo">F<span>◆</span></span>
         <div>
-          <h1>FREE CITY<span class="tag">ALPHA</span></h1>
-          <p>A society in motion. A world of its own.</p>
+          <h1>FREE CITY<span class="tag">SF</span></h1>
+          <p>SAN FRANCISCO · CITY SIMULATION</p>
         </div>
       </div>
       <div class="time">
@@ -39,9 +41,26 @@
           ><span id="weather">CLEAR SKIES</span>
         </div>
         <div class="world-title">
-          <span>EST. YEAR 01</span>
-          <h2>Small beginnings.<br />Infinite possibilities.</h2>
-          <p>Observe the choices that become a civilization.</p>
+          <span>37.7749° N / 122.4194° W</span>
+          <h2>San Francisco</h2>
+          <p id="place-name">Downtown</p>
+        </div>
+        <div class="sf-tools" aria-label="Explore San Francisco">
+          <button data-place="downtown">Downtown</button
+          ><button data-place="goldenGate">Golden Gate</button
+          ><button data-place="waterfront">Waterfront</button
+          ><button data-place="coit">Coit Tower</button
+          ><button data-place="paintedLadies">Painted Ladies</button
+          ><button data-place="park">Golden Gate Park</button
+          ><button data-place="twinPeaks">Twin Peaks</button
+          ><button data-place="city">Whole city</button>
+        </div>
+        <div class="map-options">
+          <button id="terrain-toggle" class="active" aria-pressed="true">
+            3D hills</button
+          ><button id="labels-toggle" class="active" aria-pressed="true">
+            Labels</button
+          ><button id="about-map">Map details</button>
         </div>
         <div class="metrics">
           <div>
@@ -68,9 +87,13 @@
             <span class="dot discovery"></span>Discovery
           </div>
           <span
-            >Drag orbit · Shift + drag pan · Scroll zoom
+            >Drag pan · Right-drag orbit · Scroll zoom
             <button id="reset-view">↺ View</button></span
           >
+        </div>
+        <div class="map-status-wrap">
+          <span id="map-status" role="status">Loading San Francisco…</span
+          ><button id="classic-view">Classic view</button>
         </div>
         <div id="toast" role="status" aria-live="polite"></div>
       </section>
@@ -85,6 +108,7 @@
             placeholder="Find a citizen…"
             aria-label="Search citizens" /></label
         ><select id="directory" aria-label="Select a citizen"></select>
+        <button id="focus-citizen">Locate selected citizen</button>
         <div id="inspector"></div>
       </aside>
     </main>
@@ -112,7 +136,7 @@
     </footer>
     <dialog id="welcome">
       <span class="eyebrow">WELCOME TO FREE CITY</span>
-      <h2>A world waiting<br />to unfold.</h2>
+      <h2>Your city.<br />San Francisco.</h2>
       <p>
         50 citizens. Their own ambitions. No direct commands.<br />Watch a
         society take shape, one decision at a time.
@@ -123,7 +147,7 @@
         ><button id="start">Begin a new city</button
         ><button id="welcome-import">Import save</button>
       </div>
-      <small>Adaptive rule-based simulation · Browser prototype</small>
+      <small>Geographic 3D map · Adaptive rule-based simulation</small>
     </dialog>
     <dialog id="options">
       <h2>Your city, preserved.</h2>
@@ -138,6 +162,49 @@
         Closing the game freezes city time. Resume picks up at the saved minute.
         Clearing browser data removes local saves; keep an exported backup.
       </p>
+    </dialog>
+    <dialog id="map-info">
+      <h2>San Francisco, in 3D.</h2>
+      <p>
+        Real street, coastline, and building footprints from OpenStreetMap via
+        OpenFreeMap. Building heights use mapped values when available; other
+        heights are estimates. Hills use terrain elevation at 1× scale.
+      </p>
+      <p>
+        Golden Gate Bridge, Coit Tower, and the Ferry Building have simplified
+        landmark models. This is a geographic reconstruction, not a photographic
+        or survey-grade replica. Painted Ladies and other neighborhoods use
+        mapped building volumes, without individual façade textures.
+      </p>
+      <p>
+        The 50 simulated citizens occupy a downtown district. Their movement is
+        illustrative and does not yet follow San Francisco’s street network.
+        Simulation weather and time are fictional.
+      </p>
+      <p>
+        Map tiles and elevation need an internet connection. Classic view keeps
+        the original offline-capable schematic renderer available.
+      </p>
+      <p>
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noopener"
+          >OpenStreetMap contributors</a
+        >
+        ·
+        <a href="https://openfreemap.org" target="_blank" rel="noopener"
+          >OpenFreeMap</a
+        >
+        ·
+        <a
+          href="https://registry.opendata.aws/terrain-tiles/"
+          target="_blank"
+          rel="noopener"
+          >Terrain data</a
+        >
+      </p>
+      <button id="close-map-info">Back to city</button>
     </dialog>
     <input id="file" type="file" accept=".json,application/json" hidden />
     <script type="module" src="app.js"></script>

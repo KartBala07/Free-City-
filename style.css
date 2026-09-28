@@ -591,3 +591,541 @@ dialog small {
     right: 12px;
   }
 }
+/* San Francisco observer surface */
+[hidden] {
+  display: none !important;
+}
+#sf-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.world {
+  background: #93b6c1;
+}
+header {
+  height: 90px;
+  padding: 15px 22px;
+}
+h1 {
+  font-size: 19px;
+}
+.brand p {
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.time small {
+  font-size: 12px;
+}
+.time {
+  font-size: 15px;
+}
+button {
+  font-size: 14px;
+  padding: 9px 12px;
+}
+nav button {
+  font-size: 14px;
+}
+.tag {
+  font-size: 10px !important;
+}
+main {
+  grid-template-columns: minmax(0, 1fr) 345px;
+  height: calc(100vh - 260px);
+  min-height: 660px;
+}
+.overline {
+  left: 24px;
+  top: 18px;
+  right: 62px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #123947;
+  text-shadow: 0 1px 4px #fff;
+}
+.overline .live {
+  color: #153e39;
+}
+.world-title {
+  top: 48px;
+  left: 24px;
+  text-shadow:
+    0 1px 14px #fff,
+    0 1px 5px #fff;
+}
+.world-title > span {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #274a55;
+}
+.world-title h2 {
+  font:
+    42px/1 Georgia,
+    serif;
+  color: #173e48;
+  margin: 10px 0;
+}
+.world-title p {
+  font-size: 16px;
+  color: #335461;
+  margin: 0;
+}
+.sf-tools {
+  position: absolute;
+  top: 159px;
+  left: 24px;
+  right: 65px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 760px;
+}
+.sf-tools button,
+.map-options button {
+  background: #f5f6eeed;
+  color: #23414b;
+  border-color: #b4c6c6;
+  font-size: 12px;
+  box-shadow: 0 2px 9px #18333c18;
+  padding: 7px 10px;
+  backdrop-filter: blur(6px);
+}
+.sf-tools button:hover {
+  background: #fff;
+}
+.map-options {
+  position: absolute;
+  right: 15px;
+  top: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.map-options button.active {
+  background: #214b53;
+  color: #f1faf4;
+  border-color: #41616a;
+}
+.metrics {
+  bottom: 85px;
+  background: #132b35ed;
+  border-color: #45616c;
+  left: 20px;
+  right: 20px;
+  padding: 15px 4px;
+}
+.metrics small {
+  font-size: 11px;
+  letter-spacing: 0.7px;
+}
+.metrics strong {
+  font-size: 26px;
+}
+.metrics span {
+  font-size: 12px;
+}
+.map-bottom {
+  bottom: 49px;
+  left: 20px;
+  right: 20px;
+  color: #15353f;
+  font-size: 12px;
+  background: #f4f6efed;
+  border-radius: 6px;
+  padding: 5px 8px;
+  box-shadow: 0 2px 8px #1c363522;
+}
+.map-bottom button {
+  font-size: 12px;
+}
+.map-bottom .dot {
+  margin-left: 5px;
+}
+.map-bottom > span {
+  font-size: 11px;
+}
+.map-status-wrap {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 27px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+#map-status {
+  font-size: 11px;
+  color: #214654;
+  background: #eef5f3db;
+  padding: 2px 6px;
+  border-radius: 4px;
+  max-width: 75%;
+}
+#map-status.error {
+  color: #852d19;
+  background: #fff2de;
+}
+#classic-view {
+  pointer-events: auto;
+  padding: 2px 6px;
+  font-size: 11px;
+  background: #edf4ef;
+  color: #365660;
+}
+.maplibregl-ctrl-attrib {
+  font-size: 10px !important;
+}
+.maplibregl-ctrl-scale {
+  font-size: 10px;
+  background: #e9f0e9d9 !important;
+}
+.maplibregl-ctrl-top-right {
+  top: 12px;
+  right: 4px;
+}
+.maplibregl-ctrl-group button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+}
+.maplibregl-canvas:focus {
+  outline: none;
+}
+aside {
+  padding: 20px;
+}
+.aside-head {
+  font-size: 12px;
+  letter-spacing: 0.7px;
+}
+.search input,
+select {
+  font-size: 14px;
+}
+.search {
+  padding-top: 16px;
+}
+#focus-citizen {
+  width: 100%;
+  margin-top: 10px;
+  background: #25424c;
+  border-color: #3b5860;
+}
+.citizen-head h2 {
+  font-size: 21px;
+}
+.citizen-head p,
+.badge {
+  font-size: 12px;
+}
+.vitals small {
+  font-size: 12px;
+}
+.section-title {
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+.section-title small {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.node {
+  font-size: 14px;
+}
+.branches .node {
+  font-size: 13px;
+}
+.thought {
+  font-size: 16px;
+}
+.drive {
+  font-size: 13px;
+  grid-template-columns: 82px 1fr 25px;
+}
+.memory {
+  font-size: 13px;
+}
+.memory small {
+  font-size: 12px;
+}
+.muted {
+  font-size: 13px;
+}
+footer {
+  height: 170px;
+  padding: 17px 22px;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 20px;
+}
+.event {
+  font-size: 13px;
+  gap: 12px;
+}
+.event time {
+  font-size: 11px;
+}
+.catalysts {
+  padding-left: 20px;
+}
+.catalysts > small {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 12px;
+}
+.catalyst-buttons button {
+  font-size: 12px;
+  padding: 8px;
+}
+.chronicle .section-title {
+  margin-bottom: 10px;
+}
+dialog {
+  max-width: 620px;
+  padding: 32px;
+}
+dialog p {
+  font-size: 15px;
+}
+dialog small {
+  font-size: 12px;
+}
+dialog a {
+  color: #9eeac9;
+}
+#map-info {
+  max-height: 85vh;
+  overflow: auto;
+}
+#map-info h2 {
+  font-size: 32px;
+}
+.eyebrow {
+  font-size: 12px;
+}
+#toast {
+  z-index: 5;
+  bottom: 205px;
+  max-width: 90%;
+  font-size: 14px;
+}
+@media (min-width: 1700px) {
+  main {
+    grid-template-columns: minmax(0, 1fr) 390px;
+  }
+  .sf-tools button {
+    font-size: 14px;
+  }
+  .map-options button {
+    font-size: 14px;
+  }
+}
+@media (max-width: 1100px) {
+  header {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .brand {
+    flex: 1 0 50%;
+  }
+  .time {
+    margin: 0;
+  }
+  main {
+    height: 720px;
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .time small {
+    font-size: 11px;
+  }
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .metrics > div {
+    border: 0;
+  }
+  .map-bottom > span {
+    display: none;
+  }
+  .sf-tools {
+    top: 154px;
+    max-width: 440px;
+    right: 85px;
+  }
+  .world-title h2 {
+    font-size: 34px;
+  }
+  .map-options {
+    top: 210px;
+  }
+  .metrics strong {
+    font-size: 22px;
+  }
+  .metrics span {
+    font-size: 11px;
+  }
+  footer {
+    height: auto;
+    min-height: 170px;
+  }
+  .section-title {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 740px) {
+  main {
+    display: block;
+    height: auto;
+    min-height: 0;
+  }
+  .world {
+    height: 720px;
+  }
+  aside {
+    border-left: 0;
+  }
+  .world-title {
+    left: 15px;
+  }
+  .world-title h2 {
+    font-size: 35px;
+  }
+  .sf-tools {
+    left: 15px;
+    right: 15px;
+    top: 153px;
+  }
+  .map-options {
+    top: 248px;
+    right: 12px;
+  }
+  .overline {
+    left: 15px;
+    font-size: 11px;
+  }
+  .overline #weather {
+    display: none;
+  }
+  .metrics {
+    left: 12px;
+    right: 12px;
+  }
+  .map-bottom {
+    left: 12px;
+    right: 12px;
+  }
+  .map-status-wrap {
+    bottom: 33px;
+  }
+  #map-status {
+    max-width: 70%;
+    font-size: 10px;
+  }
+  .brand p {
+    display: block;
+    font-size: 10px;
+  }
+  .time small {
+    font-size: 10px;
+  }
+  header {
+    padding: 13px 12px;
+  }
+  .brand h1 {
+    font-size: 17px;
+  }
+  .time {
+    font-size: 13px;
+  }
+  .brand {
+    flex: 1 0 45%;
+  }
+  .logo {
+    display: none;
+  }
+  nav {
+    margin-right: auto;
+  }
+  header button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  footer {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .catalysts {
+    padding-left: 0;
+    border: 0;
+  }
+  dialog {
+    padding: 23px;
+    max-width: 92vw;
+  }
+  .dialog-actions {
+    gap: 8px;
+  }
+  dialog h2 {
+    font-size: 34px;
+  }
+  .maplibregl-ctrl-attrib-inner {
+    max-width: 280px;
+  }
+  .maplibregl-ctrl-attrib {
+    font-size: 9px !important;
+  }
+}
+.world-title {
+  background: #f2f5ecde;
+  padding: 12px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  top: 46px;
+}
+.world-title h2 {
+  font-size: 32px;
+  margin: 7px 0;
+}
+.world-title > span {
+  font-size: 11px;
+}
+.world-title p {
+  font-size: 13px;
+}
+.sf-tools {
+  top: 182px;
+}
+.overline {
+  background: #edf4e9dc;
+  border-radius: 4px;
+  padding: 4px 7px;
+  max-width: 480px;
+}
+.map-status-wrap {
+  bottom: 31px;
+}
+#classic-view {
+  margin-right: 2px;
+}
+@media (max-width: 740px) {
+  .sf-tools {
+    top: 182px;
+  }
+  .map-options {
+    top: 290px;
+  }
+  .world-title h2 {
+    font-size: 30px;
+  }
+  .world-title {
+    padding: 10px 12px;
+  }
+  .map-status-wrap {
+    bottom: 40px;
+  }
+}

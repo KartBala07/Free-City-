@@ -7,7 +7,7 @@ import {
   catalyst,
 } from "./src/simulation.js";
 import { encode, decode, readSave, writeSave } from "./src/persistence.js";
-import { Renderer } from "./src/renderer.js";
+import { Renderer } from "./src/sf-renderer.js";
 const $ = (id) => document.getElementById(id),
   escape = (s) =>
     String(s).replace(
@@ -55,6 +55,8 @@ function save(manual = false) {
 function restore(data) {
   world = data.world;
   Object.assign(view, data.view);
+  view.mapCamera = data.view.mapCamera;
+  renderer.restoreView();
   accumulator = 0;
   last = performance.now();
   started = true;
@@ -86,6 +88,8 @@ function startNew() {
     panY: 15,
     selected: 1,
   });
+  delete view.mapCamera;
+  renderer.reset();
   accumulator = 0;
   started = true;
   saveAllowed = true;
@@ -157,14 +161,33 @@ for (const b of document.querySelectorAll("[data-catalyst]"))
     catalyst(world, b.dataset.catalyst);
     renderUI();
   };
-$("reset-view").onclick = () =>
-  Object.assign(view, { angle: 0.65, zoom: 1, panX: 0, panY: 15 });
+$("reset-view").onclick = () => renderer.reset();
+for (const button of document.querySelectorAll("[data-place]"))
+  button.onclick = () => renderer.fly(button.dataset.place);
+$("focus-citizen").onclick = () => renderer.focusCitizen();
+$("terrain-toggle").onclick = (e) => {
+  const on = renderer.toggleTerrain();
+  if (on !== undefined) {
+    e.currentTarget.classList.toggle("active", on);
+    e.currentTarget.setAttribute("aria-pressed", on);
+  }
+};
+$("labels-toggle").onclick = (e) => {
+  const on = renderer.toggleLabels();
+  if (on !== undefined) {
+    e.currentTarget.classList.toggle("active", on);
+    e.currentTarget.setAttribute("aria-pressed", on);
+  }
+};
+$("about-map").onclick = () => $("map-info").showModal();
+$("close-map-info").onclick = () => $("map-info").close();
 $("directory").onchange = (e) => {
   view.selected = Number(e.target.value);
   renderUI();
 };
 $("search").oninput = renderDirectory;
 function renderDirectory() {
+  if (document.activeElement === $("directory")) return;
   const query = $("search").value.toLowerCase();
   const list = world.citizens.filter((a) =>
     a.name.toLowerCase().includes(query),
@@ -275,7 +298,11 @@ function frame(now) {
   const delta = Math.min(0.25, (now - last) / 1000);
   last = now;
   const running =
-    started && !document.hidden && !$("welcome").open && !$("options").open;
+    started &&
+    !document.hidden &&
+    !$("welcome").open &&
+    !$("options").open &&
+    !$("map-info").open;
   if (running && view.speed) {
     accumulator += delta * 10 * view.speed;
     const steps = Math.floor(accumulator);

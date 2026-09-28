@@ -79,3 +79,21 @@ test("long run stays serializable and advances days without wall clock", () => {
   );
   assert.deepEqual(decode(encode(w, view)).world, w);
 });
+
+test("geographic camera persists while legacy saves remain compatible", () => {
+  const world = createWorld(42);
+  const camera = {
+    center: [-122.4783, 37.8199],
+    zoom: 14.2,
+    pitch: 62,
+    bearing: -35,
+  };
+  const restored = decode(encode(world, { ...view, mapCamera: camera }));
+  assert.deepEqual(restored.view.mapCamera, camera);
+  assert.equal(decode(encode(world, view)).view.mapCamera, undefined);
+  assert.throws(() =>
+    decode(
+      encode(world, { ...view, mapCamera: { ...camera, zoom: Infinity } }),
+    ),
+  );
+});
