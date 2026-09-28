@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Free City · A society in motion</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="logo">F<span>◆</span></span>
+        <div>
+          <h1>FREE CITY<span class="tag">ALPHA</span></h1>
+          <p>A society in motion. A world of its own.</p>
+        </div>
+      </div>
+      <div class="time">
+        <span id="calendar">Y1 · Day 1 · 08:00</span
+        ><small>1 real second = 10 city minutes at 1×</small>
+      </div>
+      <nav aria-label="Game speed">
+        <button data-speed="0" aria-label="Pause">Ⅱ</button
+        ><button data-speed="1">1×</button><button data-speed="5">5×</button
+        ><button data-speed="20">20×</button>
+      </nav>
+      <button id="save">Save city</button><button id="load">Resume</button
+      ><button id="menu">•••</button>
+    </header>
+    <main>
+      <section class="world">
+        <canvas
+          id="city"
+          aria-label="City observer view. Drag to orbit, shift-drag to pan, scroll to zoom. Select citizens using the directory."
+          tabindex="0"
+        ></canvas>
+        <div class="overline">
+          <span class="live">● LIVING SIMULATION</span
+          ><span id="weather">CLEAR SKIES</span>
+        </div>
+        <div class="world-title">
+          <span>EST. YEAR 01</span>
+          <h2>Small beginnings.<br />Infinite possibilities.</h2>
+          <p>Observe the choices that become a civilization.</p>
+        </div>
+        <div class="metrics">
+          <div>
+            <small>POPULATION</small><strong id="population">50</strong
+            ><span id="generations">50 founders</span>
+          </div>
+          <div>
+            <small>FOOD RESERVE</small><strong id="food">180</strong
+            ><span id="price">2.0 credits / unit</span>
+          </div>
+          <div>
+            <small>COMMUNITY WEALTH</small><strong id="wealth">0</strong
+            ><span id="treasury">0 public credits</span>
+          </div>
+          <div>
+            <small>CITY MOOD</small><strong id="mood">Hopeful</strong
+            ><span id="council">Council forming</span>
+          </div>
+        </div>
+        <div class="map-bottom">
+          <div>
+            <span class="dot commons"></span>Commons
+            <span class="dot enterprise"></span>Enterprise
+            <span class="dot discovery"></span>Discovery
+          </div>
+          <span
+            >Drag orbit · Shift + drag pan · Scroll zoom
+            <button id="reset-view">↺ View</button></span
+          >
+        </div>
+        <div id="toast" role="status" aria-live="polite"></div>
+      </section>
+      <aside>
+        <div class="aside-head">
+          <span>CITIZEN OBSERVATORY</span><span class="live">●</span>
+        </div>
+        <label class="search"
+          >⌕
+          <input
+            id="search"
+            placeholder="Find a citizen…"
+            aria-label="Search citizens" /></label
+        ><select id="directory" aria-label="Select a citizen"></select>
+        <div id="inspector"></div>
+      </aside>
+    </main>
+    <footer>
+      <div class="chronicle">
+        <div class="section-title">
+          <span>CITY CHRONICLE</span><small>Every choice leaves a trace</small>
+        </div>
+        <div id="events"></div>
+      </div>
+      <div class="catalysts">
+        <div class="section-title">
+          <span>ENVIRONMENT</span><small>Introduce a gentle catalyst</small>
+        </div>
+        <div class="catalyst-buttons">
+          <button data-catalyst="Food">+ Wild harvest</button
+          ><button data-catalyst="Clear">☀ Clear</button
+          ><button data-catalyst="Rain">☂ Rain</button
+          ><button data-catalyst="Drought">Drought</button>
+        </div>
+        <small id="save-status"
+          >Autosaves every 30 seconds · Stored in this browser</small
+        >
+      </div>
+    </footer>
+    <dialog id="welcome">
+      <span class="eyebrow">WELCOME TO FREE CITY</span>
+      <h2>A world waiting<br />to unfold.</h2>
+      <p>
+        50 citizens. Their own ambitions. No direct commands.<br />Watch a
+        society take shape, one decision at a time.
+      </p>
+      <p id="saved-detail"></p>
+      <div class="dialog-actions">
+        <button id="continue" class="primary">Continue saved city</button
+        ><button id="start">Begin a new city</button
+        ><button id="welcome-import">Import save</button>
+      </div>
+      <small>Adaptive rule-based simulation · Browser prototype</small>
+    </dialog>
+    <dialog id="options">
+      <h2>Your city, preserved.</h2>
+      <p>Save here or export a backup to resume in another browser.</p>
+      <div class="dialog-actions">
+        <button id="export">Download save</button
+        ><button id="import">Import save</button
+        ><button id="new">New city</button
+        ><button id="close-options">Back to city</button>
+      </div>
+      <p class="muted">
+        Closing the game freezes city time. Resume picks up at the saved minute.
+        Clearing browser data removes local saves; keep an exported backup.
+      </p>
+    </dialog>
+    <input id="file" type="file" accept=".json,application/json" hidden />
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
