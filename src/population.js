@@ -1,3 +1,4 @@
+import {DISTRICTS} from "./city-life.js";
 // A deterministic virtual census, not fifty million per-frame agents.
 export const POPULATION = 50_000_000;
 export const ACTIVE_LIMIT = 400;
@@ -13,7 +14,7 @@ const choose=(arr,id,salt)=>arr[hash(id,salt)%arr.length];
 export function residentName(id,seed=1){const household=Math.floor((id-1)/4);return `${choose(FIRST,id,seed)} ${String.fromCharCode(65+hash(id,seed+4)%26)}. ${choose(LAST,household+1,seed+7)}`;}
 export function homeFor(id,seed=1){
  const household=Math.floor((id-1)/4),building=Math.floor(household/500)+1,within=household%500,floor=Math.floor(within/20)+1,door=within%20+1;
- const x=(unit(building,seed+30)-.5)*44,z=(unit(building,seed+31)-.5)*44;
+ const district=DISTRICTS[(building-1)%DISTRICTS.length],x=district.x+(unit(building,seed+30)-.5)*20,z=district.z+(unit(building,seed+31)-.5)*20;
  return {household:household+1,building,floor,unit:door,rooms:2+hash(household,seed)%3,x,z,label:`Bay Residence ${building.toLocaleString('en-US')} · Floor ${floor} · Apt ${String(door).padStart(2,'0')}`};
 }
 export function householdIds(id){const first=Math.floor((id-1)/4)*4+1;return [first,first+1,first+2,first+3];}
@@ -34,7 +35,7 @@ export function makeActive(id,seed,minutes=480){
 export function seedPopulation(world,replace=false){
  if(world.population)return world;
  world.population={total:POPULATION,seed:world.rng>>>0,modelVersion:1};
- if(replace){world.citizens=Array.from({length:INITIAL_ACTIVE},(_,i)=>makeActive(i+1,world.population.seed,world.minutes));world.food=INITIAL_ACTIVE*6;world.materials=400;world.events=[{time:world.minutes,text:'A virtual city of 50 million residents begins. 240 residents are active.'}];}
+ if(replace){world.citizens=Array.from({length:INITIAL_ACTIVE},(_,i)=>makeActive(Math.floor(i/4)*2000+i%4+1,world.population.seed,world.minutes));world.food=INITIAL_ACTIVE*6;world.materials=400;world.events=[{time:world.minutes,text:'A virtual city of 50 million residents begins. 240 residents are active.'}];}
  else for(const a of world.citizens){if(a.id<=POPULATION){const p=profile(a.id,world.population.seed);a.archetype=a.name;a.name=p.name;for(const key of ['home','job','skills','gender','generation','skin','clothes'])a[key]=p[key];a.role=a.age<18?'Student':p.job.title;}}
  world.nextId=Math.max(POPULATION+1,world.nextId,...world.citizens.map(a=>a.id+1));return world;
 }

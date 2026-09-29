@@ -16,7 +16,19 @@ Open http://localhost:8000. Keep the same host and port to access the same brows
 
 ## Live as yourself
 
-Choose **Live as yourself** in the sidebar, enter a name, adult age, job and appearance, and enter the city. Hold W/A/S/D or the direction buttons to walk north/west/south/east within the active district. The simulation must be running. Choose meals, sleep, work, social visits, recreation, learning, exploration or clinic visits; the character travels and then carries out the activity. **Stop** cancels the current plan. **Return to observer** gives the character autonomous decisions; **Take control** returns manual control. **Find me** locates the character and **My mind** opens the inspector. Your character shares the needs, money, relationships, disease risks and mortality of NPCs. This is local single-player control, not multiplayer.
+Choose **Live as yourself** in the sidebar, enter a name, adult age, job and appearance, and enter the city. Hold W/A/S/D or the direction buttons to walk north/west/south/east across the simulated city. The simulation must be running. Choose meals, sleep, work, social visits, recreation, learning, exploration or clinic visits; the character travels and then carries out the activity. **Stop** cancels the current plan. **Return to observer** gives the character autonomous decisions; **Take control** returns manual control. **Find me** locates the character and **My mind** opens the inspector. Your character shares the needs, money, relationships, disease risks and mortality of NPCs. This is local single-player control, not multiplayer.
+
+## Life Studio: control and citywide autonomy
+
+The resident inspector now has four focused pages: **Mind**, **Life settings**, **People & society**, and **History & home**. The Mind view connects body, mood, experience, current choice and goal with readable cards instead of a dense neural wiring diagram.
+
+- Edit any active resident's bedtime, sleep duration, meal times, portion size, social skill, knowledge, solitude preference, curiosity and risk taking. Settings persist in saves and influence future autonomous choices. Manual player control takes precedence over routines.
+- Queue a specific activity for an NPC or your own character; turn an NPC's autonomy off to leave them idle between directions. Travel to one of 14 San Francisco neighborhood destinations. New cities start with households spread across those neighborhoods; existing saves retain positions and can travel out of downtown naturally.
+- Citywide movement is schematic, with faster transit for longer trips. It is not road-constrained navigation or accurate transit routing. Manual walking stays inside the modeled city bounds.
+- Residents converse in contextual, rule-generated dialogue, strengthen or damage relationships, develop friendships, and can form study circles or mutual-help groups. Groups can share money with poorer members. The People page includes conversation transcripts and lets your player visit an active resident with a custom message.
+- Solitude reduces stress. High-risk, financially desperate adults may attempt theft; the action has monetary, reputation and trust consequences and can result in a fine. Manual directions also expose these actions.
+- Completed autonomous experiences adjust bounded learned weights, caution, and some social/curiosity preferences. The Mind page shows adaptation history. Residents never execute arbitrary self-written source code; this is simulated emotion and autonomy, not sentience.
+- Legacy ten-action brain saves migrate to the expanded action set without discarding learned weights. All current schedules, conversations, communities, directions and adaptations are validated and saved.
 
 ## Uploaded GENESIS integration and richer life
 
@@ -29,7 +41,7 @@ Two fictional game illnesses have incubation, proximity transmission, symptoms, 
 ## Population and citizen dashboard
 
 - Enter a resident ID from 1 to 50,000,000, browse census pages, or choose a random resident. Name search covers the current page and active residents, not a full census index.
-- Open a citizen to inspect the weighted decision network, simulated inner voice, body, traits, skills, work, family links and memories. The graph shows the actual learned weights. The ranked table separates instinctive need and learned contributions. Committed plans can remain active even when another score becomes higher.
+- Open a citizen to inspect the weighted decision network, simulated inner voice, body, traits, skills, work, family links and memories. The Mind page shows readable influences, ranked priorities, and learned changes. Committed plans can remain active even when another score becomes higher.
 - Apartment building/floor/door controls resolve a stable household. Each initial household has two adults and two children. Names are fictional and may repeat; IDs are unique.
 - Activate a census household to run its members live. Off-screen census profiles use a daily schedule and gain episodic memories only after activation.
 - Three.js renders animated head, torso, arm and leg meshes with varied skin/clothing colors. People are enlarged and drawn over buildings at city scale for selection. These are stylized figures, not photorealistic characters.

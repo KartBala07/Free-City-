@@ -1,3 +1,4 @@
+import {communityDay} from "./social-life.js";
 import { inheritBrain } from "./brain.js";
 import { lifeTick, healthTick } from "./life.js";
 import { FIRST, ACTIVE_LIMIT } from "./population.js";
@@ -193,6 +194,7 @@ export function tick(s) {
   }
   if (s.ticks % 60 === 0) social(s, alive);
   if (s.ticks % 1440 === 0) {
+    communityDay(s);
     const leader = [...alive].sort(
       (a, b) =>
         b.drives.empathy +
@@ -276,6 +278,7 @@ function social(s, alive) {
       const child = {
         ...a,
         id,
+        routine: null, directive: null, autonomy: true,
         brain: inheritBrain([a.brain,b.brain],()=>random(s)), life: null, illness: null, immunity: {},
         name: `${FIRST[id % FIRST.length]} ${a.name.split(" ").at(-1)}`,
         job: {title:"Child",sector:"Education",employer:"Home",wage:0},

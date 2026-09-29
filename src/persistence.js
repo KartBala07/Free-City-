@@ -1,3 +1,5 @@
+import {validRoutine,CITY_BOUNDS} from "./city-life.js";
+import {upgradeBrain} from "./brain.js";
 import { ACTIONS, INPUTS, HIDDEN } from "./brain.js";
 import { DISEASES } from "./life.js";
 import { validMapCamera } from "./geography.js";
@@ -74,10 +76,10 @@ export function decode(raw) {
       !Number.isInteger(a.faction) ||
       a.faction < 0 ||
       a.faction > 2 ||
-      !finite(a.x, -100, 100) ||
-      !finite(a.z, -100, 100) ||
-      !finite(a.target?.x, -100, 100) ||
-      !finite(a.target?.z, -100, 100)
+      !finite(a.x, -1000, 1000) ||
+      !finite(a.z, -1000, 1000) ||
+      !finite(a.target?.x, -1000, 1000) ||
+      !finite(a.target?.z, -1000, 1000)
     )
       throw new Error("Invalid citizen position.");
     for (const key of Object.keys(t.citizens[0].drives))
@@ -85,7 +87,7 @@ export function decode(raw) {
     if (
       !logs(a.memories) ||
       !Array.isArray(a.scores) ||
-      a.scores.length > 10 ||
+      a.scores.length > 20 ||
       !a.scores.every(
         (v) => Array.isArray(v) && text(v[0]) && finite(v[1], 0, 10),
       )
@@ -100,16 +102,22 @@ export function decode(raw) {
       )
     )
       throw new Error("Invalid relationships.");
-    if(a.home && (!Number.isInteger(a.home.building) || !finite(a.home.building,1,25000) || !Number.isInteger(a.home.floor) || !finite(a.home.floor,1,25) || !Number.isInteger(a.home.unit) || !finite(a.home.unit,1,20) || !finite(a.home.x,-100,100) || !finite(a.home.z,-100,100) || !text(a.home.label))) throw new Error("Invalid apartment.");
+    if(a.home && (!Number.isInteger(a.home.building) || !finite(a.home.building,1,25000) || !Number.isInteger(a.home.floor) || !finite(a.home.floor,1,25) || !Number.isInteger(a.home.unit) || !finite(a.home.unit,1,20) || !finite(a.home.x,-1000,1000) || !finite(a.home.z,-1000,1000) || !text(a.home.label))) throw new Error("Invalid apartment.");
     if(a.job && (!text(a.job.title)||!text(a.job.sector)||!text(a.job.employer)||!finite(a.job.wage,0,10))) throw new Error("Invalid job.");
     if(a.skills && (typeof a.skills!=="object" || !Object.entries(a.skills).every(([k,v])=>text(k)&&finite(v,0,100)))) throw new Error("Invalid skills.");
     if(a.friends && (!Array.isArray(a.friends)||a.friends.length>500||!a.friends.every(id=>Number.isInteger(id)&&id>0))) throw new Error("Invalid friends.");
     for(const key of ['skin','clothes']) if(a[key] && !/^#[a-f0-9]{6}$/i.test(a[key])) throw new Error("Invalid appearance.");
     const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(x=>finite(x,-5,5));
-    if(a.brain && (a.brain.version!==1 || !vector(a.brain.w1,INPUTS*HIDDEN)||!vector(a.brain.b1,HIDDEN)||!vector(a.brain.w2,HIDDEN*ACTIONS.length)||!vector(a.brain.b2,ACTIONS.length)||!Number.isInteger(a.brain.lessons)||!finite(a.brain.lessons))) throw Error("Invalid learned brain.");
+    if(a.brain && (![1,2].includes(a.brain.version) || !vector(a.brain.w1,INPUTS*HIDDEN)||!vector(a.brain.b1,HIDDEN)||![10,ACTIONS.length].includes(a.brain.b2?.length)||!vector(a.brain.w2,HIDDEN*a.brain.b2.length)||!vector(a.brain.b2,a.brain.b2.length)||!Number.isInteger(a.brain.lessons)||!finite(a.brain.lessons))) throw Error("Invalid learned brain.");
     if(a.life){const l=a.life;if(!['loneliness','boredom','stress','satisfaction'].every(k=>finite(l[k],0,1))||!logs(l.history)||!logs(l.thoughts)||!l.recent||Array.isArray(l.recent)||!Object.entries(l.recent).every(([k,v])=>ACTIONS.includes(k)&&finite(v)))throw Error("Invalid life state.");
       const p=l.plan;if(p && (!ACTIONS.includes(p.action)||!finite(p.started)||!finite(p.remaining,0,1000)||!finite(p.worked,0,10000)||!vector(p.x,INPUTS)||!finite(p.reward,-100,100)||typeof p.controlled!=='boolean'||(p.peer!==null&&!Number.isInteger(p.peer)))) throw Error("Invalid action plan.");
     }
+    if(a.routine&&!validRoutine(a.routine))throw Error("Invalid life preferences.");
+    if(a.autonomy!==undefined&&typeof a.autonomy!=='boolean')throw Error("Invalid autonomy setting.");
+    if(a.life?.adaptations&&!logs(a.life.adaptations))throw Error("Invalid adaptation history.");
+    if(a.life?.reputation!==undefined&&!finite(a.life.reputation,-1,1))throw Error("Invalid reputation.");
+    if(a.directive&&(!ACTIONS.includes(a.directive.action)||(a.directive.target&&(!finite(a.directive.target.x,-1000,1000)||!finite(a.directive.target.z,-1000,1000)))||(a.directive.peer!==undefined&&!Number.isInteger(a.directive.peer))||(a.directive.message!==undefined&&(!text(a.directive.message)||a.directive.message.length>240))))throw Error("Invalid direction.");
+    if(a.life?.plan?.message!==undefined&&(!text(a.life.plan.message)||a.life.plan.message.length>240))throw Error("Invalid conversation message.");
     if(a.illness && (!Object.hasOwn(DISEASES,a.illness.kind)||!finite(a.illness.since)||!finite(a.illness.ends)||a.illness.ends<a.illness.since||typeof a.illness.treated!=='boolean')) throw Error("Invalid illness.");
     if(a.immunity && (typeof a.immunity!=='object'||Array.isArray(a.immunity)||!Object.entries(a.immunity).every(([k,v])=>Object.hasOwn(DISEASES,k)&&finite(v))))throw Error("Invalid immunity.");
     for (const key of ["parents", "children"])
@@ -134,6 +142,9 @@ export function decode(raw) {
       throw new Error("Invalid family references.");
   if(w.player && (!ids.has(w.player.id)||typeof w.player.controlled!=='boolean'||(w.player.command!==null&&!ACTIONS.includes(w.player.command))||!finite(w.player.move?.x,-1,1)||!finite(w.player.move?.z,-1,1))) throw Error("Invalid player character.");
   for(const a of w.citizens)if(a.life?.plan?.peer!==null&&a.life?.plan?.peer!==undefined&&!ids.has(a.life.plan.peer))throw Error("Invalid action partner.");
+  for(const a of w.citizens)if(a.directive?.peer!==undefined&&!ids.has(a.directive.peer))throw Error("Invalid direction recipient.");
+  if(w.conversations&&(!Array.isArray(w.conversations)||w.conversations.length>80||!w.conversations.every(c=>finite(c.time)&&ids.has(c.from)&&ids.has(c.to)&&text(c.text)&&text(c.reply)&&text(c.topic))))throw Error("Invalid conversations.");
+  if(w.communities&&(!Array.isArray(w.communities)||w.communities.length>24||!w.communities.every(c=>Number.isInteger(c.id)&&text(c.name)&&text(c.purpose)&&finite(c.created)&&Array.isArray(c.members)&&c.members.length<=500&&c.members.every(id=>ids.has(id)))))throw Error("Invalid communities.");
   const v = data.view;
   if (
     !v ||
@@ -149,6 +160,7 @@ export function decode(raw) {
     throw new Error("Invalid geographic camera.");
   if (!text(data.savedAt) || !Number.isFinite(Date.parse(data.savedAt)))
     throw new Error("Invalid save date.");
+  for(const a of w.citizens)if(a.brain)upgradeBrain(a.brain);
   return data;
 }
 export function writeSave(storage, world, view) {

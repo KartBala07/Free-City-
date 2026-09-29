@@ -240,9 +240,10 @@ export class Renderer {
     document.getElementById("place-name").textContent = PLACES[key].label;
   }
   focusCitizen() {
-    if (!this.map || !this.world) return;
+    if (!this.world) return;
     const a = resident(this.world,this.view.selected).person;
-    if (a)
+    if(a&&this.classic){const p=this.classic.project(a.x,a.z);this.view.panX+=this.canvas.clientWidth/2-p.x;this.view.panY+=this.canvas.clientHeight/2-p.y;return;}
+    if (a&&this.map)
       this.map.flyTo({
         center: citizenLngLat(a),
         zoom: 18.1,
@@ -287,7 +288,7 @@ export class Renderer {
     this.status.textContent =
       "Classic view · Schematic city, not San Francisco";
     for (const b of document.querySelectorAll(
-      "[data-place],#terrain-toggle,#labels-toggle,#focus-citizen",
+      "[data-place],#terrain-toggle,#labels-toggle",
     ))
       b.disabled = true;
   }

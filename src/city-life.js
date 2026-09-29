@@ -1,0 +1,12 @@
+// Approximate neighborhood anchors, not a street navigation mesh.
+export const DISTRICTS=[
+ ['Downtown',-122.403,37.793],['North Beach',-122.410,37.803],['Marina',-122.438,37.801],['Presidio',-122.463,37.800],['Richmond',-122.480,37.780],['Golden Gate Park',-122.469,37.7694],['Sunset',-122.485,37.754],['Haight',-122.446,37.769],['Castro',-122.435,37.760],['Mission',-122.419,37.759],['SoMa',-122.402,37.777],['Bernal Heights',-122.415,37.739],['Bayview',-122.391,37.734],['Excelsior',-122.432,37.724]
+].map(([name,lng,lat],id)=>({id,name,x:(lng+122.403)*87900/12,z:(37.793-lat)*111320/12}));
+export const CITY_BOUNDS={minX:-850,maxX:220,minZ:-190,maxZ:730};
+export function districtAt(a){return DISTRICTS.reduce((best,d)=>Math.hypot(a.x-d.x,a.z-d.z)<Math.hypot(a.x-best.x,a.z-best.z)?d:best,DISTRICTS[0]);}
+export function cityDestination(a,action,rand){let d=districtAt(a);if(['Explore','Travel'].includes(action))d=DISTRICTS[Math.floor(rand()*DISTRICTS.length)];else if(action==='Work'||action==='Research')d=DISTRICTS[(a.id*11)%DISTRICTS.length];const offset={Eat:[0,4],Clinic:[-6,8],School:[-10,-3],Play:[-11,10],Solitude:[-16,16],Research:[10,-3],Work:[10,13]}[action]||[0,0];return {x:d.x+offset[0]+(rand()-.5)*8,z:d.z+offset[1]+(rand()-.5)*8};}
+export function routineFor(a){return a.routine||{sleepStart:23,sleepHours:8,meals:[8,13,19],mealSize:1,socialSkill:a.skills?.communication??40,knowledge:a.skills?.research??30,solitude:1-a.drives.empathy,curiosity:a.drives.analysis,risk:a.drives.aggression};}
+export function sleepTime(w,a){const r=routineFor(a),hour=(w.minutes%1440)/60;return (hour-r.sleepStart+24)%24<r.sleepHours;}
+export function mealTime(w,a){const hour=(w.minutes%1440)/60;return routineFor(a).meals.some(h=>(hour-h+24)%24<1);}
+export function validRoutine(r){return r&&Number.isFinite(r.sleepStart)&&r.sleepStart>=0&&r.sleepStart<24&&Number.isFinite(r.sleepHours)&&r.sleepHours>=1&&r.sleepHours<=16&&Array.isArray(r.meals)&&r.meals.length>=1&&r.meals.length<=6&&r.meals.every(h=>Number.isFinite(h)&&h>=0&&h<24)&&[.7,1,1.3].includes(r.mealSize)&&['socialSkill','knowledge'].every(k=>Number.isFinite(r[k])&&r[k]>=0&&r[k]<=100)&&['solitude','curiosity','risk'].every(k=>Number.isFinite(r[k])&&r[k]>=0&&r[k]<=1);}
+export function setRoutine(a,r){if(!validRoutine(r))throw Error('Check sleep hours, meal times and skill values.');a.routine=structuredClone(r);a.skills??={};a.skills.communication=r.socialSkill;a.skills.research=r.knowledge;a.drives.analysis=r.curiosity;a.drives.aggression=r.risk;}
