@@ -14,10 +14,22 @@ python3 -m http.server 8000 --directory dist
 
 Open http://localhost:8000. Keep the same host and port to access the same browser save. Serve the files over HTTP; opening index.html directly is not supported by ES modules. Any static web host can serve the generated `dist/` folder.
 
+## Live as yourself
+
+Choose **Live as yourself** in the sidebar, enter a name, adult age, job and appearance, and enter the city. Hold W/A/S/D or the direction buttons to walk north/west/south/east within the active district. The simulation must be running. Choose meals, sleep, work, social visits, recreation, learning, exploration or clinic visits; the character travels and then carries out the activity. **Stop** cancels the current plan. **Return to observer** gives the character autonomous decisions; **Take control** returns manual control. **Find me** locates the character and **My mind** opens the inspector. Your character shares the needs, money, relationships, disease risks and mortality of NPCs. This is local single-player control, not multiplayer.
+
+## Uploaded GENESIS integration and richer life
+
+The uploaded prototype's neural forward/reward-learning implementation has been adapted to the main engine with deterministic randomness, JSON-saveable weights, bounded learning and inherited mutation. Its additional needs, disease/contact concepts, thought history, brain/instinct rankings, walking direction and illness appearance are integrated into the existing San Francisco game. Original supplied source modules are preserved in `reference/genesis-upload/`; the old global world, old Three.js bundle, accelerated ages and caveman terrain are not loaded into the city.
+
+NPCs commit to destinations and activities, respond to loneliness/boredom/stress as well as physical needs, learn from completed actions, and give recently completed actions lower priority. Urgent hunger, exhaustion or illness can interrupt NPC plans. Decisions combine needs, learned preferences, novelty and seeded exploration; this is simulated autonomy, not consciousness or unrestricted human-level reasoning. A finite activity repertoire still exists, but it is not a fixed action cycle.
+
+Two fictional game illnesses have incubation, proximity transmission, symptoms, clinic care, recovery and temporary immunity. Occasional daily introductions seed infections among live residents. Values are gameplay balance parameters, not a medical model. Virtual census residents do not independently transmit disease or learn until activated. The learned network, social needs, action plans, health states and player record persist in saves; held movement keys are cleared on resume.
+
 ## Population and citizen dashboard
 
 - Enter a resident ID from 1 to 50,000,000, browse census pages, or choose a random resident. Name search covers the current page and active residents, not a full census index.
-- Open a citizen to inspect the weighted decision network, simulated inner voice, body, traits, skills, work, family links and memories. Graph weights are the same weights used by the decision engine.
+- Open a citizen to inspect the weighted decision network, simulated inner voice, body, traits, skills, work, family links and memories. The graph shows the actual learned weights. The ranked table separates instinctive need and learned contributions. Committed plans can remain active even when another score becomes higher.
 - Apartment building/floor/door controls resolve a stable household. Each initial household has two adults and two children. Names are fictional and may repeat; IDs are unique.
 - Activate a census household to run its members live. Off-screen census profiles use a daily schedule and gain episodic memories only after activation.
 - Three.js renders animated head, torso, arm and leg meshes with varied skin/clothing colors. People are enlarged and drawn over buildings at city scale for selection. These are stylized figures, not photorealistic characters.
@@ -49,7 +61,7 @@ A San Francisco geographic map with 3D building extrusions, terrain, simplified 
 
 ## Scope and remaining design work
 
-This is an early playable prototype, not the complete Unity/Unreal design. The default renderer uses MapLibre GL JS and Three.js. The original schematic Canvas renderer remains available through Classic view. Citizen navigation is simple point-to-point movement, not obstacle-aware pathfinding. Decisions use adaptive rules; there is no local LLM or self-modifying neural network. Only caution currently adapts through experience; offspring inherit mutated drives. Factions and council selection are simplified. Full elections, laws, territorial warfare, treaties, construction, multi-stage industrial production, cultural evolution, sophisticated childcare, vector memory and long-term planning remain future work. The live simulation is capped at 400 resident records; retained histories are bounded. The other census records are generated on demand, not independently simulated. The 25,000 virtual buildings and 12.5 million apartments are a fictional allocation, not actual San Francisco housing. The one-slot save schema is versioned for future migrations.
+This is an early playable prototype, not the complete Unity/Unreal design. The default renderer uses MapLibre GL JS and Three.js. The original schematic Canvas renderer remains available through Classic view. Citizen navigation is simple point-to-point movement, not obstacle-aware pathfinding. Decisions combine adaptive needs with a small reward-trained neural preference network; there is no local LLM. Network weights and caution adapt through experience; offspring inherit mutated drives and learned weights. Factions and council selection are simplified. Full elections, laws, territorial warfare, treaties, construction, multi-stage industrial production, cultural evolution, sophisticated childcare, vector memory and long-term planning remain future work. The live simulation is capped at 400 resident records; retained histories are bounded. The other census records are generated on demand, not independently simulated. The 25,000 virtual buildings and 12.5 million apartments are a fictional allocation, not actual San Francisco housing. The one-slot save schema is versioned for future migrations.
 
 ## Validation
 

@@ -1,3 +1,5 @@
+import { ACTIONS, INPUTS, HIDDEN } from "./brain.js";
+import { DISEASES } from "./life.js";
 import { validMapCamera } from "./geography.js";
 import { createWorld } from "./simulation.js";
 export const SAVE_KEY = "free-city.save.v1";
@@ -6,7 +8,7 @@ export function encode(world, view) {
     format: "free-city",
     version: 1,
     savedAt: new Date().toISOString(),
-    world,
+    world: world.player ? {...world,player:{...world.player,move:{x:0,z:0}}} : world,
     view,
   });
 }
@@ -103,6 +105,13 @@ export function decode(raw) {
     if(a.skills && (typeof a.skills!=="object" || !Object.entries(a.skills).every(([k,v])=>text(k)&&finite(v,0,100)))) throw new Error("Invalid skills.");
     if(a.friends && (!Array.isArray(a.friends)||a.friends.length>500||!a.friends.every(id=>Number.isInteger(id)&&id>0))) throw new Error("Invalid friends.");
     for(const key of ['skin','clothes']) if(a[key] && !/^#[a-f0-9]{6}$/i.test(a[key])) throw new Error("Invalid appearance.");
+    const vector=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(x=>finite(x,-5,5));
+    if(a.brain && (a.brain.version!==1 || !vector(a.brain.w1,INPUTS*HIDDEN)||!vector(a.brain.b1,HIDDEN)||!vector(a.brain.w2,HIDDEN*ACTIONS.length)||!vector(a.brain.b2,ACTIONS.length)||!Number.isInteger(a.brain.lessons)||!finite(a.brain.lessons))) throw Error("Invalid learned brain.");
+    if(a.life){const l=a.life;if(!['loneliness','boredom','stress','satisfaction'].every(k=>finite(l[k],0,1))||!logs(l.history)||!logs(l.thoughts)||!l.recent||Array.isArray(l.recent)||!Object.entries(l.recent).every(([k,v])=>ACTIONS.includes(k)&&finite(v)))throw Error("Invalid life state.");
+      const p=l.plan;if(p && (!ACTIONS.includes(p.action)||!finite(p.started)||!finite(p.remaining,0,1000)||!finite(p.worked,0,10000)||!vector(p.x,INPUTS)||!finite(p.reward,-100,100)||typeof p.controlled!=='boolean'||(p.peer!==null&&!Number.isInteger(p.peer)))) throw Error("Invalid action plan.");
+    }
+    if(a.illness && (!Object.hasOwn(DISEASES,a.illness.kind)||!finite(a.illness.since)||!finite(a.illness.ends)||a.illness.ends<a.illness.since||typeof a.illness.treated!=='boolean')) throw Error("Invalid illness.");
+    if(a.immunity && (typeof a.immunity!=='object'||Array.isArray(a.immunity)||!Object.entries(a.immunity).every(([k,v])=>Object.hasOwn(DISEASES,k)&&finite(v))))throw Error("Invalid immunity.");
     for (const key of ["parents", "children"])
       if (
         !Array.isArray(a[key]) ||
@@ -123,6 +132,8 @@ export function decode(raw) {
       ].some((id) => !known(id))
     )
       throw new Error("Invalid family references.");
+  if(w.player && (!ids.has(w.player.id)||typeof w.player.controlled!=='boolean'||(w.player.command!==null&&!ACTIONS.includes(w.player.command))||!finite(w.player.move?.x,-1,1)||!finite(w.player.move?.z,-1,1))) throw Error("Invalid player character.");
+  for(const a of w.citizens)if(a.life?.plan?.peer!==null&&a.life?.plan?.peer!==undefined&&!ids.has(a.life.plan.peer))throw Error("Invalid action partner.");
   const v = data.view;
   if (
     !v ||

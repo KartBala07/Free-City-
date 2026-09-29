@@ -1,3 +1,6 @@
+import {createPlayer,commandPlayer,controlPlayer} from "./src/player.js";
+import {JOBS} from "./src/population.js";
+import {DISEASES} from "./src/life.js";
 import { seedPopulation, resident, POPULATION, activateHousehold, apartmentIds } from "./src/population.js";
 import { renderInspector } from "./src/inspector.js";
 import {
@@ -57,6 +60,7 @@ function save(manual = false) {
 }
 function restore(data) {
   world = seedPopulation(data.world);
+  if(world.player)world.player.move={x:0,z:0};
   Object.assign(view, data.view);
   view.mapCamera = data.view.mapCamera;
   renderer.restoreView();
@@ -213,7 +217,27 @@ $('inspector').onclick=e=>{const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-apartment')){const ids=apartmentIds(Number($('apt-building').value),Number($('apt-floor').value),Number($('apt-unit').value));if(ids.length){view.selected=ids[0];renderUI();}else toast('Choose building 1–25,000, floor 1–25, and apartment 1–20.');}
 };
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('mind-shell').hidden=true;});
+$('character-job').innerHTML=JOBS.map((j,i)=>`<option value="${i}">${escape(j.title)}</option>`).join('');
+$('create-character').onclick=()=>{$('character-error').textContent='';$('character-dialog').showModal();};
+$('cancel-character').onclick=()=>$('character-dialog').close();
+$('character-form').onsubmit=e=>{e.preventDefault();try{const a=createPlayer(world,{name:$('character-name').value,age:Number($('character-age').value),job:Number($('character-job').value),clothes:$('character-clothes').value,skin:$('character-skin').value});view.selected=a.id;view.speed=1;$('character-dialog').close();renderer.world=world;renderer.focusCitizen();renderUI();save();toast('Welcome home. Use W A S D to walk or choose an activity.');}catch(e){$('character-error').textContent=e.message;}};
+function stopMovement(){if(world.player)world.player.move={x:0,z:0};keys.clear();}
+const keys=new Set();
+$('take-control').onclick=()=>{controlPlayer(world,!world.player.controlled);if(world.player.controlled)view.speed=1;renderUI();};
+$('locate-player').onclick=()=>{view.selected=world.player.id;renderer.focusCitizen();renderUI();};
+$('inspect-player').onclick=()=>{view.selected=world.player.id;$('mind-shell').hidden=false;renderUI();};
+$('stop-player').onclick=()=>{stopMovement();const a=world.citizens.find(a=>a.id===world.player?.id);if(a?.life)a.life.plan=null;if(world.player)world.player.command=null;renderUI();};
+for(const b of document.querySelectorAll('[data-player-action]'))b.onclick=()=>{try{stopMovement();commandPlayer(world,b.dataset.playerAction);toast(`${b.textContent} queued${view.speed===0?' — resume time to begin':''}.`);renderUI();}catch(e){toast(e.message);}};
+function movementAllowed(){return world.player?.controlled&&!document.querySelector('dialog[open]')&&$('mind-shell').hidden&&!document.activeElement?.matches('input,select,textarea');}
+function updateMovement(){if(!world.player)return;world.player.move={x:(keys.has('d')?1:0)-(keys.has('a')?1:0),z:(keys.has('s')?1:0)-(keys.has('w')?1:0)};}
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if('wasd'.includes(k)&&k.length===1&&movementAllowed()){e.preventDefault();keys.add(k);updateMovement();}});
+document.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());updateMovement();});
+window.addEventListener('blur',stopMovement);
+for(const b of document.querySelectorAll('[data-walk]')){b.onpointerdown=e=>{if(!world.player?.controlled)return;e.preventDefault();b.setPointerCapture(e.pointerId);const[x,z]=b.dataset.walk.split(',').map(Number);world.player.move={x,z};};b.onpointerup=b.onpointercancel=stopMovement;}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopMovement();});
+function renderPlayer(){const a=world.citizens.find(a=>a.id===world.player?.id);$('create-character').hidden=!!a;$('player-controls').hidden=!a;if(!a){$('player-summary').textContent='Enter the city as your own character.';return;}$('player-summary').textContent=`${a.name} · ${a.action} · ${Math.floor(a.wealth)} credits`;$('player-health').textContent=`Health ${Math.round(a.health*100)}% · Energy ${Math.round(a.energy*100)}% · ${a.health<=0?'Deceased':a.illness?DISEASES[a.illness.kind].name:'No current illness'}`;$('take-control').textContent=world.player.controlled?'Return to observer':'Take control';for(const b of document.querySelectorAll('[data-player-action],[data-walk],#stop-player'))b.disabled=!world.player.controlled||a.health<=0;}
 function renderUI() {
+  renderPlayer();
   $("calendar").textContent = dateLabel(world.minutes);
   $("weather").textContent =
     `${world.weather.toUpperCase()} · ${calendar(world.minutes).hour >= 6 && calendar(world.minutes).hour < 19 ? "DAYLIGHT" : "NIGHTFALL"}`;
@@ -223,9 +247,9 @@ function renderUI() {
     b.setAttribute("aria-pressed", active);
   }
   const alive = world.citizens.filter((a) => a.health > 0);
-  $("population").textContent = (POPULATION+world.births-world.deaths).toLocaleString();
+  $("population").textContent = (POPULATION+world.births-world.deaths+(world.player?1:0)).toLocaleString();
   $("generations").textContent =
-    `${alive.length} live · ${world.births} births · ${world.deaths} deaths`;
+    `${alive.length} live · ${alive.filter(a=>a.illness).length} ill · ${world.births} births`;
   $("food").textContent = Math.floor(world.food);
   $("price").textContent = `${world.price.toFixed(1)} credits / unit`;
   $("wealth").textContent = Math.round(
@@ -273,7 +297,7 @@ function frame(now) {
     !document.hidden &&
     !$("welcome").open &&
     !$("options").open &&
-    !$("map-info").open;
+    !$("map-info").open && !$("character-dialog").open;
   if (running && view.speed) {
     accumulator += delta * 10 * view.speed;
     const steps = Math.floor(accumulator);

@@ -99,6 +99,7 @@
           </div>
         </div>
 
+        <section class="player-card"><span class="eyebrow">YOUR LIFE IN FREE CITY</span><p id="player-summary">Enter the city as your own character.</p><button id="create-character" class="primary">Live as yourself</button><div id="player-controls" hidden><div class="player-top"><button id="take-control">Take control</button><button id="locate-player">Find me</button><button id="inspect-player">My mind</button></div><p id="player-health"></p><div id="movement" aria-label="Walk using buttons or W A S D"><button data-walk="0,-1" aria-label="Walk north">↑ N</button><button data-walk="-1,0" aria-label="Walk west">← W</button><button id="stop-player">Stop</button><button data-walk="1,0" aria-label="Walk east">E →</button><button data-walk="0,1" aria-label="Walk south">S ↓</button></div><small>Hold W A S D or a direction button to walk. City time must be running.</small><div class="player-actions"><button data-player-action="Eat">Eat a meal</button><button data-player-action="Rest">Sleep at home</button><button data-player-action="Work">Go to work</button><button data-player-action="Socialize">Visit a friend</button><button data-player-action="Play">Enjoy the park</button><button data-player-action="Research">Learn a skill</button><button data-player-action="Explore">Explore</button><button data-player-action="Clinic">Visit clinic</button></div><small>Each activity includes travel and takes city time. In observer mode, your character chooses independently.</small></div></section>
         <div class="aside-head">
           <span>CITIZEN OBSERVATORY</span><span class="live">●</span>
         </div>
@@ -140,7 +141,7 @@
       <span class="eyebrow">WELCOME TO FREE CITY</span>
       <h2>Your city.<br />San Francisco.</h2>
       <p>
-        50 million virtual residents. 240 live minds.<br />Explore named families, private apartments, and daily work. The virtual census is generated on demand; up to 400 residents can run live.
+        50 million virtual residents. 240 live minds. Now live your own life here.<br />Explore named families, private apartments, and daily work. The virtual census is generated on demand; up to 400 residents can run live.
       </p>
       <p id="saved-detail"></p>
       <div class="dialog-actions">
@@ -207,6 +208,7 @@
       </p>
       <button id="close-map-info">Back to city</button>
     </dialog>
+    <dialog id="character-dialog"><span class="eyebrow">MAKE YOURSELF AT HOME</span><h2>Your life. Your choices.</h2><form id="character-form"><label>Your name<input id="character-name" maxlength="60" required placeholder="Your name or a fictional name"></label><label>Age<input id="character-age" type="number" min="18" max="90" value="25" required></label><label>Work<select id="character-job"></select></label><label>Clothing color<input id="character-clothes" type="color" value="#58b9dd"></label><label>Skin tone<select id="character-skin"><option value="#f2c5a1">Light</option><option value="#c58d63" selected>Medium</option><option value="#825334">Brown</option><option value="#563827">Dark</option></select></label><p class="muted">Your character shares the city's needs, relationships and health risks. Saves preserve your character and choices. This is a local single-player world.</p><p id="character-error" role="alert"></p><div class="dialog-actions"><button type="submit" class="primary">Enter Free City</button><button type="button" id="cancel-character">Cancel</button></div></form></dialog>
     <input id="file" type="file" accept=".json,application/json" hidden />
     <script type="module" src="app.js"></script>
   </body>

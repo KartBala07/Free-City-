@@ -1,4 +1,5 @@
-import { decisionNetwork } from "./decisions.js";
+import { inheritBrain } from "./brain.js";
+import { lifeTick, healthTick } from "./life.js";
 import { FIRST, ACTIVE_LIMIT } from "./population.js";
 export const NAMES = [
   "TensorFlow",
@@ -176,10 +177,10 @@ export function tick(s) {
   s.food +=
     0.09 * (s.weather === "Rain" ? 1.6 : s.weather === "Drought" ? 0.25 : 1);
   s.price = clamp(180 / Math.max(12, s.food), 0.5, 15);
+  healthTick(s,alive,()=>random(s));
   for (const a of alive) {
     a.age += 1 / 518400;
-    a.hunger = clamp(a.hunger + 0.0018);
-    a.energy = clamp(a.energy - 0.0009);
+
     if (a.hunger > 0.95) a.health = clamp(a.health - 0.0007);
     if (a.age > 85) a.health = clamp(a.health - 0.000015);
     if (a.health <= 0) {
@@ -188,66 +189,7 @@ export function tick(s) {
       log(s, `${a.name} has died.`);
       continue;
     }
-    if (s.ticks % 10 === a.id % 10) {
-      a.scores = decisionNetwork(s,a).outputs.map(n=>[n.name,n.value]);
-      a.action = a.scores[0][0];
-      if (a.action === "Eat") {
-        aim(a, 0, 4);
-        a.thought = `Hunger is ${Math.round(a.hunger * 100)}%. Food costs ${s.price.toFixed(1)} credits.`;
-      }
-      if (a.action === "Rest") {
-        aim(a, a.home?.x ?? -10, a.home?.z ?? -15);
-        a.thought = "I need to recover before taking on more work.";
-      }
-      if (a.action === "Family") { aim(a,a.home?.x ?? -10,a.home?.z ?? -15); a.thought="Time at home helps me care for my family."; }
-      if (a.action === "School") { aim(a,-10,-3); a.thought="Learning and seeing my classmates matter to me."; }
-      if (a.action === "Work") {
-        const dest =
-          (a.role === "Builder" || a.job?.sector === "Construction")
-            ? [10, 13]
-            : (a.role === "Researcher" || ["Research","Technology"].includes(a.job?.sector))
-              ? [10, -3]
-              : (a.role === "Trader" || ["Retail","Hospitality","Finance"].includes(a.job?.sector))
-                ? [0, 4]
-                : [-10, -3];
-        aim(a, ...dest);
-        a.thought = `My ${a.role.toLowerCase()} work supports my goal: ${a.goal.toLowerCase()}.`;
-      }
-      if (a.action === "Socialize") {
-        const b = alive[Math.floor(random(s) * alive.length)];
-        aim(a, b.x, b.z);
-        a.thought = `I would like to connect with ${b.name}.`;
-      }
-      if (a.action === "Explore") {
-        aim(a, (random(s) - 0.5) * 48, (random(s) - 0.5) * 48);
-        a.thought = "New places may reveal new possibilities.";
-      }
-    }
-    const dx = a.target.x - a.x,
-      dz = a.target.z - a.z,
-      dist = Math.hypot(dx, dz);
-    if (dist > 0.6) {
-      a.x += (dx / dist) * 0.32;
-      a.z += (dz / dist) * 0.32;
-    } else {
-      if (a.action === "Eat" && s.food >= 1 && (a.wealth >= s.price || a.age<18)) {
-        s.food--;
-        a.wealth = Math.max(0,a.wealth-s.price);
-        s.treasury += s.price;
-        a.hunger = clamp(a.hunger - 0.2);
-        a.health = clamp(a.health + 0.02);
-      }
-      if (a.action === "School" && a.skills) a.skills.research = Math.min(100,a.skills.research+.002);
-      if (a.action === "Family") a.energy=clamp(a.energy+.003);
-      if (a.action === "Rest") a.energy = clamp(a.energy + 0.025);
-      if (a.action === "Work") {
-        a.wealth += (a.job?.wage ?? .25) * (1 - s.tax);
-        s.treasury += (a.job?.wage ?? .25) * s.tax;
-        s.food += 0.14;
-        s.materials += 0.025;
-        a.energy = clamp(a.energy - 0.001);
-      }
-    }
+    lifeTick(s,a,()=>random(s));
   }
   if (s.ticks % 60 === 0) social(s, alive);
   if (s.ticks % 1440 === 0) {
@@ -334,6 +276,7 @@ function social(s, alive) {
       const child = {
         ...a,
         id,
+        brain: inheritBrain([a.brain,b.brain],()=>random(s)), life: null, illness: null, immunity: {},
         name: `${FIRST[id % FIRST.length]} ${a.name.split(" ").at(-1)}`,
         job: {title:"Child",sector:"Education",employer:"Home",wage:0},
         skills: {communication:0,building:0,research:0,care:0,creativity:0,organization:0},
